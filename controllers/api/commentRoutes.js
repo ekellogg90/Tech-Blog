@@ -22,7 +22,7 @@ router.get('/', async (req, res) => {
     }
   });
   
-  router.post('/', withAuth, async (req, res) => {
+  router.post('/', async (req, res) => {
     try {
       const newComment = await Comment.create({
         comment: req.body.comment,
@@ -36,7 +36,7 @@ router.get('/', async (req, res) => {
     }
   });
 
-router.put('/:id', withAuth, async (req, res) => {
+router.put('/:id', async (req, res) => {
     try {
         const updateComment = await Comment.update(req.body, {
             where: {
@@ -53,7 +53,7 @@ router.put('/:id', withAuth, async (req, res) => {
     }
 });
 
-router.delete('/:id', withAuth, async (req, res) => {
+router.delete('/:id', async (req, res) => {
     try {
         const comment = await Comment.destroy({
             where: {
