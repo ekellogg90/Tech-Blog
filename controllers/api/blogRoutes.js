@@ -32,8 +32,8 @@ router.put('/:id', withAuth, async (req, res) => {
         id: req.params.id,
       },
     });
-    if (!blogData) {
-      res.status(404).json({ message: "No Post found at this ID"});
+    if (!blogData[0]) {
+      res.status(400).json({ message: "No Post found at this ID" });
       return;
     }
     res.status(200).json(blogData);
