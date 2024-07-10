@@ -3,27 +3,44 @@ const { User } = require('../../models');
 
 router.get('/', async (req, res) => {
   try {
-    const userData = await User.findAll()
+    const userData = await User.findAll({
+      attributes: { exclude: ['password'] },
+    });
     res.status(200).json(userData);
   } catch (err) {
     res.status(400).json(err)
   }
 });
 
-router.post('/', async (req, res) => {
+router.get('/:id', async (req, res) => {
   try {
-    const userData = await User.create(req.body);
-
-    req.session.save(() => {
-      req.session.user_id = userData.id;
-      req.session.logged_in = true;
-
-      res.status(200).json(userData);
+    const userData = await User.findByPk(req.params.id, {
+      attributes: { exclude: ['password'] },
     });
+    if (!userData) {
+      res.status(400).json({ message: 'No user found at this ID' });
+      return;
+    }
+    res.status(200).json(userData);
   } catch (err) {
-    res.status(400).json(err);
+    res.status(400).json(err)
   }
 });
+
+// router.post('/', async (req, res) => {
+//   try {
+//     const userData = await User.create(req.body);
+
+//     req.session.save(() => {
+//       req.session.user_id = userData.id;
+//       req.session.logged_in = true;
+
+//       res.status(200).json(userData);
+//     });
+//   } catch (err) {
+//     res.status(400).json(err);
+//   }
+// });
 
 router.post('/login', async (req, res) => {
   try {
@@ -52,6 +69,24 @@ router.post('/login', async (req, res) => {
       res.json({ user: userData, message: 'You are now logged in!' });
     });
 
+  } catch (err) {
+    res.status(400).json(err);
+  }
+});
+
+router.post('/signup', async (req, res) => {
+  try {
+    const newUser = new User()
+    newUser.name = req.body.name;
+    newUser.email = req.body.email;
+    newUser.password = req.body.password;
+    
+    const userData = await newUser.save();
+    req.session.save(() => {
+      req.session.user_id = userData.id;
+      req.session.logged_in = true;
+      res.status(200).json(userData);
+    });
   } catch (err) {
     res.status(400).json(err);
   }
