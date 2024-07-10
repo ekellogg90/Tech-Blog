@@ -6,15 +6,16 @@ const seedUser = require('./userData');
 const seedAll = async () => {
   await sequelize.sync({ force: true });
   console.log('\n----- DATABASE SYNCED -----\n');
+
+  await seedUser();
+  console.log('\n----- Users SEEDED -----\n');
+
   await seedBlogPosts();
   console.log('\n----- Blog Posts SEEDED -----\n');
 
   await seedComments();
   console.log('\n----- Comments SEEDED -----\n');
-
-  await seedUser();
-  console.log('\n----- UsersS SEEDED -----\n');
-
+  
   process.exit(0);
 };
 

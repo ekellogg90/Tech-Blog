@@ -1,5 +1,5 @@
 const router = require('express').Router();
-const { BlogPost, User } = require('../models');
+const { BlogPost, User, Comment } = require('../models');
 const withAuth = require('../utils/auth');
 
 router.get('/', async (req, res) => {
@@ -10,6 +10,10 @@ router.get('/', async (req, res) => {
         {
           model: User,
           attributes: ['name'],
+        },
+        {
+          model: Comment,
+          attributes: ['body'],
         },
       ],
     });
@@ -35,6 +39,15 @@ router.get('/blog/:id', async (req, res) => {
           model: User,
           attributes: ['name'],
         },
+        {
+          model: Comment,
+          include: [
+            {
+              model: User,
+              attributes: ['name']
+            }
+          ],
+        },
       ],
     });
     const blog = blogData.get({ plain: true });
@@ -51,16 +64,20 @@ router.get('/blog/:id', async (req, res) => {
 router.get('/dashboard', withAuth, async (req, res) => {
   try {
     // Find the logged in user based on the session ID
-    const userData = await User.findByPk(req.session.user_id, {
+    const blogData = await BlogPost.findAll({
+      where: { user_id: req.session.user_id },
       attributes: { exclude: ['password'] },
-      include: [{ model: BlogPost }],
+      include: [{ 
+        model: User,
+        attributes: ['name']
+      }
+      ],
     });
 
-    const user = userData.get({ plain: true });
-    console.log(user);
+    const blogs = blogData.get({ plain: true });
     res.render('dashboard', {
-      user,
-      logged_in: true
+      blogs,
+      logged_in: req.session.logged_in
     });
   } catch (err) {
     res.status(500).json(err);
@@ -75,6 +92,52 @@ router.get('/login', (req, res) => {
   }
 
   res.render('login');
+});
+
+router.get('/signup', (req, res) => {
+  if (req.session.logged_in) {
+    res.redirect('dashboard');
+    return;
+  }
+  res.render('signup')
+});
+
+router.get('/createblog', (req, res) => {
+  if (req.session.logged_in) {
+    res.render('createblog', {
+      logged_in: req.session.logged_in
+    });
+    return;
+  }
+  res.redirect('/login')
+});
+
+router.get('/editblog', async (req, res) => {
+  try {
+    const blogData = await BlogPost.findByPk(req.params.id, {
+      include: [
+        {
+          model: User,
+          attributes: ['name']
+        },
+        {
+          model: Comment,
+          include: [{
+            model: User,
+            attributes: ['name']
+          }],
+        },
+      ],
+    });
+    const blog = blogData.get({ plain: true });
+
+    res.render('editblog', {
+      ...blog,
+      logged_in: req.session.logged_in,
+    });
+  } catch (err) {
+    res.status(500).json(err);
+  }
 });
 
 module.exports = router;

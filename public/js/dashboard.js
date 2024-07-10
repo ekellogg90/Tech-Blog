@@ -35,6 +35,16 @@ const newFormHandler = async (event) => {
       }
     }
   };
+
+  // const editBlogPost = async (event) => {
+  //   event.preventDefault();
+  
+  //   const id = event.target.getAttribute("data-id");
+  
+  //   document.location.assign(`/create/${blogPostId}`);
+  // };
+  
+  // const editButton = document.querySelectorAll("#editBtn");
   
   document
     .querySelector('.new-blog-form')
@@ -43,4 +53,8 @@ const newFormHandler = async (event) => {
   document
     .querySelector('.blog-list')
     .addEventListener('click', delButtonHandler);
+
+  // document
+  //   .querySelector('#editBtn')
+  //   .addEventListener('click', editBlogPost);
   
